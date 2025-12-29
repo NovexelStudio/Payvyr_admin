@@ -22,8 +22,8 @@ export default function Navigation() {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-8">
-            <Link href="/" className="text-2xl font-black gradient-text hover:scale-105 transition-transform">
-              Payvyr<span className="text-[#D62323]">Admin</span>
+            <Link href="/" className="text-2xl font-bold gradient-text hover:scale-105 transition-transform">
+              Payvyr<span className="text-red-500">Admin</span>
             </Link>
             <div className="hidden lg:flex space-x-2">
               {navItems.map((item) => {
@@ -33,9 +33,9 @@ export default function Navigation() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 hover-lift ${
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 hover-lift ${
                       isActive
-                        ? 'bg-gradient-to-r from-[#D62323] to-[#ff4757] text-white shadow-lg pulse-glow'
+                        ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg'
                         : 'text-gray-300 hover:text-white hover:bg-white/5'
                     }`}
                   >
@@ -48,7 +48,7 @@ export default function Navigation() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 px-4 py-2 rounded-full text-sm font-bold border border-green-500/30">
+            <div className="hidden md:flex items-center gap-3 bg-green-500/10 text-green-400 px-3 py-1.5 rounded-lg text-sm font-medium border border-green-500/20">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
               System Online
             </div>
@@ -75,9 +75,9 @@ export default function Navigation() {
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                    className={`flex flex-col items-center gap-2 p-4 rounded-lg text-sm font-medium transition-all duration-300 ${
                       isActive
-                        ? 'bg-gradient-to-r from-[#D62323] to-[#ff4757] text-white shadow-lg'
+                        ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg'
                         : 'text-gray-300 hover:text-white hover:bg-white/5'
                     }`}
                   >

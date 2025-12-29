@@ -1,8 +1,8 @@
 'use client'
 
-import { banUser, unbanUser, getUserInfo, getAllUsers, getUserRealtimeData, getAllUsersRealtimeData } from '../actions'
+import { banUser, unbanUser, getUserInfo, getAllUsers, getUserRealtimeData, getAllUsersRealtimeData, addCoinsToUser, setUserCoins, resetUserStats } from '../actions'
 import Navigation from '../components/Navigation'
-import { ShieldAlert, UserCheck, UserX, Users, Search, Crown, Coins, Eye, TrendingUp, Calendar, Activity } from 'lucide-react'
+import { ShieldAlert, UserCheck, UserX, Users, Search, Crown, Coins, Eye, TrendingUp, Calendar, Activity, Plus, Settings, RotateCcw, X } from 'lucide-react'
 import { useState } from 'react'
 
 interface User {
@@ -49,6 +49,12 @@ export default function UsersPage() {
   const [showAllUsers, setShowAllUsers] = useState(false)
   const [userRealtimeData, setUserRealtimeData] = useState<UserRealtimeData | null>(null)
   const [allUsersRealtimeData, setAllUsersRealtimeData] = useState<Record<string, UserRealtimeData>>({})
+  const [showUserModal, setShowUserModal] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [selectedUserRealtimeData, setSelectedUserRealtimeData] = useState<UserRealtimeData | null>(null)
+  const [modalAction, setModalAction] = useState<'addCoins' | 'setCoins' | 'resetStats' | null>(null)
+  const [coinAmount, setCoinAmount] = useState('')
+  const [modalLoading, setModalLoading] = useState(false)
 
   const handleUserSearch = async () => {
     if (!userSearch.trim()) return
@@ -75,6 +81,81 @@ export default function UsersPage() {
       setAllUsersRealtimeData(realtimeResult.usersData || {})
     }
     setAllUsersLoading(false)
+  }
+
+  const openUserModal = async (user: User, action: 'addCoins' | 'setCoins' | 'resetStats') => {
+    setSelectedUser(user)
+    setModalAction(action)
+    setCoinAmount('')
+    setShowUserModal(true)
+
+    // Fetch realtime data for this user
+    const realtimeResult = await getUserRealtimeData(user.uid)
+    setSelectedUserRealtimeData(realtimeResult.userData)
+  }
+
+  const closeUserModal = () => {
+    setShowUserModal(false)
+    setSelectedUser(null)
+    setSelectedUserRealtimeData(null)
+    setModalAction(null)
+    setCoinAmount('')
+  }
+
+  const handleAddCoins = async () => {
+    if (!selectedUser || !coinAmount) return
+
+    setModalLoading(true)
+    const formData = new FormData()
+    formData.append('uid', selectedUser.uid)
+    formData.append('coins', coinAmount)
+
+    const result = await addCoinsToUser(formData)
+
+    if (result.success) {
+      // Refresh the data
+      const realtimeResult = await getAllUsersRealtimeData()
+      setAllUsersRealtimeData(realtimeResult.usersData || {})
+      closeUserModal()
+    }
+    setModalLoading(false)
+  }
+
+  const handleSetCoins = async () => {
+    if (!selectedUser || !coinAmount) return
+
+    setModalLoading(true)
+    const formData = new FormData()
+    formData.append('uid', selectedUser.uid)
+    formData.append('coins', coinAmount)
+
+    const result = await setUserCoins(formData)
+
+    if (result.success) {
+      // Refresh the data
+      const realtimeResult = await getAllUsersRealtimeData()
+      setAllUsersRealtimeData(realtimeResult.usersData || {})
+      closeUserModal()
+    }
+    setModalLoading(false)
+  }
+
+  const handleResetStats = async () => {
+    if (!selectedUser) return
+
+    setModalLoading(true)
+    const formData = new FormData()
+    formData.append('uid', selectedUser.uid)
+
+    const result = await resetUserStats(formData)
+
+    if (result.success) {
+      // Refresh the data
+      const realtimeResult = await getAllUsersRealtimeData()
+      setAllUsersRealtimeData(realtimeResult.usersData || {})
+      closeUserModal()
+    }
+    setModalLoading(false)
   }
 
   return (
@@ -215,6 +296,34 @@ export default function UsersPage() {
                           </button>
                         </form>
                       )}
+                    </div>
+
+                    {/* User Modification Actions */}
+                    <div className="mt-4 pt-4 border-t border-white/10">
+                      <h4 className="text-sm font-semibold text-gray-300 mb-3">Modify User Data</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          onClick={() => userInfo.user && openUserModal(userInfo.user, 'addCoins')}
+                          className="p-3 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 rounded-lg transition-all duration-300 flex flex-col items-center gap-1"
+                        >
+                          <Plus size={16} />
+                          <span className="text-xs">Add Coins</span>
+                        </button>
+                        <button
+                          onClick={() => userInfo.user && openUserModal(userInfo.user, 'setCoins')}
+                          className="p-3 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 hover:text-purple-300 rounded-lg transition-all duration-300 flex flex-col items-center gap-1"
+                        >
+                          <Settings size={16} />
+                          <span className="text-xs">Set Coins</span>
+                        </button>
+                        <button
+                          onClick={() => userInfo.user && openUserModal(userInfo.user, 'resetStats')}
+                          className="p-3 bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 hover:text-orange-300 rounded-lg transition-all duration-300 flex flex-col items-center gap-1"
+                        >
+                          <RotateCcw size={16} />
+                          <span className="text-xs">Reset</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -393,6 +502,27 @@ export default function UsersPage() {
                                 </button>
                               </form>
                             )}
+                            <button
+                              onClick={() => openUserModal(user, 'addCoins')}
+                              className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 rounded-lg transition-all duration-300"
+                              title="Add Coins"
+                            >
+                              <Plus size={16} />
+                            </button>
+                            <button
+                              onClick={() => openUserModal(user, 'setCoins')}
+                              className="p-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 hover:text-purple-300 rounded-lg transition-all duration-300"
+                              title="Set Coins"
+                            >
+                              <Settings size={16} />
+                            </button>
+                            <button
+                              onClick={() => openUserModal(user, 'resetStats')}
+                              className="p-2 bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 hover:text-orange-300 rounded-lg transition-all duration-300"
+                              title="Reset Stats"
+                            >
+                              <RotateCcw size={16} />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -405,6 +535,113 @@ export default function UsersPage() {
 
         </div>
       </main>
+
+      {/* User Modification Modal */}
+      {showUserModal && selectedUser && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gray-900 rounded-2xl border border-white/10 shadow-2xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl text-white">
+                    <Settings size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white">
+                      {modalAction === 'addCoins' && 'Add Coins'}
+                      {modalAction === 'setCoins' && 'Set Coins'}
+                      {modalAction === 'resetStats' && 'Reset Statistics'}
+                    </h3>
+                    <p className="text-gray-400 text-sm">{selectedUser.email || 'Anonymous User'}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={closeUserModal}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <X size={20} className="text-gray-400" />
+                </button>
+              </div>
+
+              {selectedUserRealtimeData && (
+                <div className="mb-6 p-4 bg-white/5 rounded-lg border border-white/10">
+                  <h4 className="text-sm font-semibold text-gray-300 mb-3">Current Stats</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-400">Coins:</span>
+                      <span className="text-yellow-400 font-bold ml-2">{selectedUserRealtimeData.coins || 0}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Total Earned:</span>
+                      <span className="text-green-400 font-bold ml-2">R{selectedUserRealtimeData.totalEarned || 0}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {modalAction !== 'resetStats' && (
+                <div className="mb-6">
+                  <label className="block text-sm font-semibold text-gray-300 mb-3">
+                    {modalAction === 'addCoins' ? 'Coins to Add' : 'New Coin Amount'}
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={coinAmount}
+                    onChange={(e) => setCoinAmount(e.target.value)}
+                    placeholder={modalAction === 'addCoins' ? 'Enter coins to add...' : 'Enter new coin amount...'}
+                    className="custom-input w-full"
+                  />
+                </div>
+              )}
+
+              {modalAction === 'resetStats' && (
+                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <ShieldAlert size={16} className="text-red-400" />
+                    <span className="text-red-400 font-semibold">Warning</span>
+                  </div>
+                  <p className="text-sm text-gray-300">
+                    This will reset all user statistics to zero. This action cannot be undone.
+                  </p>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  onClick={closeUserModal}
+                  className="flex-1 btn-secondary"
+                  disabled={modalLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={
+                    modalAction === 'addCoins' ? handleAddCoins :
+                    modalAction === 'setCoins' ? handleSetCoins :
+                    handleResetStats
+                  }
+                  disabled={modalLoading || (modalAction !== 'resetStats' && !coinAmount)}
+                  className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {modalLoading ? (
+                    <>
+                      <div className="spinner w-4 h-4"></div>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      {modalAction === 'addCoins' && <><Plus size={16} /> Add Coins</>}
+                      {modalAction === 'setCoins' && <><Settings size={16} /> Set Coins</>}
+                      {modalAction === 'resetStats' && <><RotateCcw size={16} /> Reset Stats</>}
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

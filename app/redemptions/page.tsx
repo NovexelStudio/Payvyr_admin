@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Navigation from '@/app/components/Navigation'
-import { Download, Search, Filter, X, Copy, Gift } from 'lucide-react'
-import { getRedemptions, getAllUsers } from '@/app/actions'
+import { Download, Search, Filter, X, Copy, Gift, UserX, ChevronDown, ChevronRight } from 'lucide-react'
+import { getRedemptions, getAllUsers, banUser } from '@/app/actions'
 
 interface Redemption {
   id?: string
@@ -41,9 +41,22 @@ interface User {
   }
 }
 
+interface GroupedUser {
+  userId: string
+  userEmail: string
+  redemptions: Redemption[]
+  totalRedemptions: number
+  totalCoinsSpent: number
+  completedCount: number
+  pendingCount: number
+  rejectedCount: number
+  processingCount: number
+  lastRedemption: number
+}
+
 export default function RedemptionsPage() {
   const [redemptions, setRedemptions] = useState<Redemption[]>([])
-  const [filteredRedemptions, setFilteredRedemptions] = useState<Redemption[]>([])
+  const [filteredRedemptions, setFilteredRedemptions] = useState<(Redemption | GroupedUser)[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'processing' | 'completed' | 'rejected'>('all')
@@ -51,6 +64,9 @@ export default function RedemptionsPage() {
   const [showFilters, setShowFilters] = useState(false)
   const [sortBy, setSortBy] = useState<'date' | 'amount' | 'user'>('date')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set())
+  const [groupByUser, setGroupByUser] = useState(true)
+  const [groupedRedemptionsArray, setGroupedRedemptionsArray] = useState<any[]>([])
 
   useEffect(() => {
     loadData()
@@ -108,40 +124,96 @@ export default function RedemptionsPage() {
   }
 
   useEffect(() => {
-    let filtered = redemptions
+    // Group redemptions by user
+    const groupedData = redemptions.reduce((groups, redemption) => {
+      const userId = redemption.userId
+      if (!groups[userId]) {
+        groups[userId] = {
+          userId,
+          userEmail: redemption.userEmail || 'Unknown User',
+          redemptions: [],
+          totalRedemptions: 0,
+          totalCoinsSpent: 0,
+          completedCount: 0,
+          pendingCount: 0,
+          rejectedCount: 0,
+          processingCount: 0,
+          lastRedemption: redemption.createdAt
+        }
+      }
 
-    // Status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(r => r.status === statusFilter)
+      groups[userId].redemptions.push(redemption)
+      groups[userId].totalRedemptions++
+      groups[userId].totalCoinsSpent += redemption.coinCost || 0
+
+      if (redemption.status === 'completed') groups[userId].completedCount++
+      else if (redemption.status === 'pending') groups[userId].pendingCount++
+      else if (redemption.status === 'rejected') groups[userId].rejectedCount++
+      else if (redemption.status === 'processing') groups[userId].processingCount++
+
+      if (redemption.createdAt > groups[userId].lastRedemption) {
+        groups[userId].lastRedemption = redemption.createdAt
+      }
+
+      return groups
+    }, {} as Record<string, {
+      userId: string
+      userEmail: string
+      redemptions: Redemption[]
+      totalRedemptions: number
+      totalCoinsSpent: number
+      completedCount: number
+      pendingCount: number
+      rejectedCount: number
+      processingCount: number
+      lastRedemption: number
+    }>)
+
+    const groupedArray = Object.values(groupedData)
+
+    setGroupedRedemptionsArray(groupedArray)
+
+    let filtered: (Redemption | GroupedUser)[] = groupByUser ? groupedArray : redemptions
+
+    // Status filter (for individual redemptions when not grouped)
+    if (!groupByUser && statusFilter !== 'all') {
+      filtered = (filtered as Redemption[]).filter(r => r.status === statusFilter)
     }
 
     // Search filter
     if (search) {
       const searchLower = search.toLowerCase()
-      filtered = filtered.filter(r =>
-        r.userEmail?.toLowerCase().includes(searchLower) ||
-        r.userId.toLowerCase().includes(searchLower) ||
-        r.amount?.toString().includes(searchLower)
-      )
+      if (groupByUser) {
+        filtered = (filtered as GroupedUser[]).filter(user =>
+          user.userEmail?.toLowerCase().includes(searchLower) ||
+          user.userId.toLowerCase().includes(searchLower)
+        )
+      } else {
+        filtered = (filtered as Redemption[]).filter(r =>
+          r.userEmail?.toLowerCase().includes(searchLower) ||
+          r.userId.toLowerCase().includes(searchLower) ||
+          r.amount?.toString().includes(searchLower)
+        )
+      }
     }
 
     // Date filter
     const now = Date.now()
     if (dateFilter !== 'all') {
-      filtered = filtered.filter(r => {
-        const redemptionDate = new Date(r.createdAt)
+      filtered = filtered.filter(item => {
+        const itemDate = groupByUser ? (item as GroupedUser).lastRedemption : (item as Redemption).createdAt
         switch (dateFilter) {
           case 'today':
-            return redemptionDate.toDateString() === new Date().toDateString()
+            return new Date(itemDate).toDateString() === new Date().toDateString()
           case 'week':
             const weekAgo = now - 7 * 24 * 60 * 60 * 1000
-            return r.createdAt >= weekAgo
+            return itemDate >= weekAgo
           case 'month':
             const monthAgo = now - 30 * 24 * 60 * 60 * 1000
-            return r.createdAt >= monthAgo
+            return itemDate >= monthAgo
           case 'older':
             const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000
-            return r.createdAt < thirtyDaysAgo
+            return itemDate < thirtyDaysAgo
           default:
             return true
         }
@@ -149,24 +221,30 @@ export default function RedemptionsPage() {
     }
 
     // Sorting
-    const sortedRedemptions = [...filtered].sort((a, b) => {
+    const sortedData = [...filtered].sort((a, b) => {
       let compareValue = 0
-      
+
       if (sortBy === 'date') {
-        compareValue = a.createdAt - b.createdAt
+        const aDate = groupByUser ? (a as GroupedUser).lastRedemption : (a as Redemption).createdAt
+        const bDate = groupByUser ? (b as GroupedUser).lastRedemption : (b as Redemption).createdAt
+        compareValue = aDate - bDate
       } else if (sortBy === 'amount') {
-        const aAmount = parseInt(a.amount?.replace(/\D/g, '') || '0')
-        const bAmount = parseInt(b.amount?.replace(/\D/g, '') || '0')
-        compareValue = aAmount - bAmount
+        if (groupByUser) {
+          compareValue = (a as GroupedUser).totalCoinsSpent - (b as GroupedUser).totalCoinsSpent
+        } else {
+          const aAmount = parseInt((a as Redemption).amount?.replace(/\D/g, '') || '0')
+          const bAmount = parseInt((b as Redemption).amount?.replace(/\D/g, '') || '0')
+          compareValue = aAmount - bAmount
+        }
       } else if (sortBy === 'user') {
-        compareValue = (a.userEmail || '').localeCompare(b.userEmail || '')
+        compareValue = ((groupByUser ? (a as GroupedUser).userEmail : (a as Redemption).userEmail) || '').localeCompare((groupByUser ? (b as GroupedUser).userEmail : (b as Redemption).userEmail) || '')
       }
 
       return sortOrder === 'asc' ? compareValue : -compareValue
     })
 
-    setFilteredRedemptions(sortedRedemptions)
-  }, [redemptions, search, statusFilter, dateFilter, sortBy, sortOrder])
+    setFilteredRedemptions(sortedData)
+  }, [redemptions, search, statusFilter, dateFilter, sortBy, sortOrder, groupByUser])
 
   const handleSort = (column: typeof sortBy) => {
     if (sortBy === column) {
@@ -177,19 +255,63 @@ export default function RedemptionsPage() {
     }
   }
 
+  const toggleUserExpansion = (userId: string) => {
+    const newExpanded = new Set(expandedUsers)
+    if (newExpanded.has(userId)) {
+      newExpanded.delete(userId)
+    } else {
+      newExpanded.add(userId)
+    }
+    setExpandedUsers(newExpanded)
+  }
+
+  const handleBanUser = async (userId: string) => {
+    if (confirm('Are you sure you want to ban this user? This will prevent them from accessing the system.')) {
+      const formData = new FormData()
+      formData.append('uid', userId)
+      await banUser(formData)
+      // Refresh data
+      loadData()
+    }
+  }
+
   const handleExportRedemptions = () => {
     if (filteredRedemptions.length === 0) return
-    
-    const data = filteredRedemptions.map(r => ({
-      'User Email': r.userEmail,
-      'User ID': r.userId,
-      'Amount': r.amount,
-      'Coin Cost': r.coinCost,
-      'Status': r.status,
-      'Created': new Date(r.createdAt).toLocaleString(),
-      'Processed': r.processedAt ? new Date(r.processedAt).toLocaleString() : 'N/A',
-      'Code Used': r.redeemedCode || 'N/A'
-    }))
+
+    let data: any[] = []
+
+    if (groupByUser) {
+      // Export grouped data
+      data = filteredRedemptions.map(user => {
+        const groupedUser = user as GroupedUser
+        return {
+          'User Email': groupedUser.userEmail,
+          'User ID': groupedUser.userId,
+          'Total Redemptions': groupedUser.totalRedemptions,
+          'Total Coins Spent': groupedUser.totalCoinsSpent,
+          'Completed': groupedUser.completedCount,
+          'Pending': groupedUser.pendingCount,
+          'Processing': groupedUser.processingCount,
+          'Rejected': groupedUser.rejectedCount,
+          'Last Redemption': new Date(groupedUser.lastRedemption).toLocaleString()
+        }
+      })
+    } else {
+      // Export individual redemptions
+      data = filteredRedemptions.map(r => {
+        const redemption = r as Redemption
+        return {
+          'User Email': redemption.userEmail,
+          'User ID': redemption.userId,
+          'Amount': redemption.amount,
+          'Coin Cost': redemption.coinCost,
+          'Status': redemption.status,
+          'Created': new Date(redemption.createdAt).toLocaleString(),
+          'Processed': redemption.processedAt ? new Date(redemption.processedAt).toLocaleString() : 'N/A',
+          'Code Used': redemption.redeemedCode || 'N/A'
+        }
+      })
+    }
 
     const csv = [
       Object.keys(data[0]).join(','),
@@ -200,7 +322,7 @@ export default function RedemptionsPage() {
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `redemptions-${new Date().toISOString().split('T')[0]}.csv`
+    a.download = `redemptions-${groupByUser ? 'grouped' : 'detailed'}-${new Date().toISOString().split('T')[0]}.csv`
     a.click()
     window.URL.revokeObjectURL(url)
   }
@@ -336,12 +458,24 @@ export default function RedemptionsPage() {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-white">Redemption History</h2>
-                  <p className="text-gray-400 text-sm">Complete transaction log from Firebase</p>
+                  <p className="text-gray-400 text-sm">{groupByUser ? 'Grouped by user account' : 'Individual transactions'}</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold text-white">{filteredRedemptions.length}</p>
-                <p className="text-sm text-gray-400">of {redemptions.length} redemptions</p>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setGroupByUser(!groupByUser)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                    groupByUser
+                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                      : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                  }`}
+                >
+                  {groupByUser ? '📊 Grouped View' : '📋 List View'}
+                </button>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-white">{filteredRedemptions.length}</p>
+                  <p className="text-sm text-gray-400">of {groupByUser ? groupedRedemptionsArray.length : redemptions.length} {groupByUser ? 'users' : 'redemptions'}</p>
+                </div>
               </div>
             </div>
 
@@ -444,31 +578,57 @@ export default function RedemptionsPage() {
               <table className="w-full text-left">
                 <thead className="bg-white/5 text-gray-300 text-xs uppercase tracking-wider font-bold sticky top-0 z-10">
                   <tr>
-                    <th className="px-6 py-4 text-left">User</th>
-                    <th className="px-6 py-4 text-center">
+                    <th className="px-6 py-4 text-left">
                       <button
-                        onClick={() => handleSort('amount')}
+                        onClick={() => handleSort('user')}
                         className="flex items-center gap-1 hover:text-white transition-colors group"
                       >
-                        Amount
+                        {groupByUser ? 'User Account' : 'User'}
                       </button>
                     </th>
-                    <th className="px-6 py-4 text-center">
-                      <button
-                        onClick={() => handleSort('date')}
-                        className="flex items-center gap-1 hover:text-white transition-colors group"
-                      >
-                        Timestamp
-                      </button>
-                    </th>
-                    <th className="px-6 py-4 text-center">Status</th>
-                    <th className="px-6 py-4 text-center">Actions</th>
+                    {groupByUser ? (
+                      <>
+                        <th className="px-6 py-4 text-center">Total Redemptions</th>
+                        <th className="px-6 py-4 text-center">Coins Spent</th>
+                        <th className="px-6 py-4 text-center">Status Breakdown</th>
+                        <th className="px-6 py-4 text-center">
+                          <button
+                            onClick={() => handleSort('date')}
+                            className="flex items-center gap-1 hover:text-white transition-colors group"
+                          >
+                            Last Activity
+                          </button>
+                        </th>
+                        <th className="px-6 py-4 text-center">Actions</th>
+                      </>
+                    ) : (
+                      <>
+                        <th className="px-6 py-4 text-center">
+                          <button
+                            onClick={() => handleSort('amount')}
+                            className="flex items-center gap-1 hover:text-white transition-colors group"
+                          >
+                            Amount
+                          </button>
+                        </th>
+                        <th className="px-6 py-4 text-center">
+                          <button
+                            onClick={() => handleSort('date')}
+                            className="flex items-center gap-1 hover:text-white transition-colors group"
+                          >
+                            Timestamp
+                          </button>
+                        </th>
+                        <th className="px-6 py-4 text-center">Status</th>
+                        <th className="px-6 py-4 text-center">Actions</th>
+                      </>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {loading ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-8 text-center">
+                      <td colSpan={groupByUser ? 6 : 5} className="px-6 py-8 text-center">
                         <div className="flex items-center justify-center gap-3">
                           <div className="spinner w-5 h-5"></div>
                           <span className="text-gray-400">Loading redemptions...</span>
@@ -477,7 +637,7 @@ export default function RedemptionsPage() {
                     </tr>
                   ) : filteredRedemptions.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-8 text-center">
+                      <td colSpan={groupByUser ? 6 : 5} className="px-6 py-8 text-center">
                         <div className="flex flex-col items-center gap-3">
                           <div className="p-3 bg-white/5 rounded-full">
                             <Gift size={32} className="text-gray-600" />
@@ -489,13 +649,149 @@ export default function RedemptionsPage() {
                         </div>
                       </td>
                     </tr>
+                  ) : groupByUser ? (
+                    // Grouped view
+                    filteredRedemptions.map((userGroup: any, index) => (
+                      <>
+                        <tr
+                          key={userGroup.userId}
+                          className="group hover:bg-white/5 transition-all duration-200 hover:shadow-md border-l-2 border-transparent hover:border-blue-500/30 cursor-pointer"
+                          onClick={() => toggleUserExpansion(userGroup.userId)}
+                          style={{ animationDelay: `${index * 0.02}s` }}
+                        >
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              {expandedUsers.has(userGroup.userId) ? (
+                                <ChevronDown size={16} className="text-blue-400" />
+                              ) : (
+                                <ChevronRight size={16} className="text-gray-400" />
+                              )}
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-blue-400 truncate">
+                                  {userGroup.userEmail}
+                                </p>
+                                <p className="text-xs text-gray-500 truncate">
+                                  {userGroup.userId.substring(0, 12)}...
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <span className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-blue-500/20 to-blue-600/20 text-blue-400 rounded-md text-sm font-bold border border-blue-500/30">
+                              {userGroup.totalRedemptions}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <span className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 text-yellow-400 rounded-md text-sm font-bold border border-yellow-500/30">
+                              {userGroup.totalCoinsSpent}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <div className="flex gap-1 justify-center">
+                              {userGroup.completedCount > 0 && (
+                                <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs font-medium border border-green-500/30">
+                                  ✓ {userGroup.completedCount}
+                                </span>
+                              )}
+                              {userGroup.pendingCount > 0 && (
+                                <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs font-medium border border-yellow-500/30">
+                                  ⏳ {userGroup.pendingCount}
+                                </span>
+                              )}
+                              {userGroup.processingCount > 0 && (
+                                <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs font-medium border border-blue-500/30">
+                                  🔄 {userGroup.processingCount}
+                                </span>
+                              )}
+                              {userGroup.rejectedCount > 0 && (
+                                <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs font-medium border border-red-500/30">
+                                  ❌ {userGroup.rejectedCount}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <div className="text-xs">
+                              <div className="font-medium text-white">
+                                {new Date(userGroup.lastRedemption).toLocaleDateString()}
+                              </div>
+                              <div className="text-gray-500">
+                                {new Date(userGroup.lastRedemption).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleBanUser(userGroup.userId)
+                              }}
+                              className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 rounded-md transition-all duration-200"
+                              title="Ban User"
+                            >
+                              <UserX size={14} />
+                            </button>
+                          </td>
+                        </tr>
+                        {/* Expanded user transactions */}
+                        {expandedUsers.has(userGroup.userId) && (
+                          <tr>
+                            <td colSpan={6} className="px-6 py-4 bg-white/5">
+                              <div className="border border-white/10 rounded-lg overflow-hidden">
+                                <div className="bg-white/10 px-4 py-2 border-b border-white/10">
+                                  <h4 className="text-sm font-semibold text-white">Transaction History</h4>
+                                </div>
+                                <div className="max-h-64 overflow-y-auto">
+                                  {userGroup.redemptions.map((redemption: Redemption, idx: number) => (
+                                    <div key={redemption.id || idx} className="px-4 py-3 border-b border-white/5 last:border-b-0 hover:bg-white/5 transition-colors">
+                                      <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-4">
+                                          <span className="text-sm font-medium text-green-400">{redemption.amount}</span>
+                                          <span className="text-xs text-gray-400">
+                                            {new Date(redemption.createdAt).toLocaleDateString()} {new Date(redemption.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          {redemption.status === 'completed' ? (
+                                            <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs font-medium border border-green-500/30">✓ Completed</span>
+                                          ) : redemption.status === 'processing' ? (
+                                            <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs font-medium border border-blue-500/30">🔄 Processing</span>
+                                          ) : redemption.status === 'pending' ? (
+                                            <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs font-medium border border-yellow-500/30">⏳ Pending</span>
+                                          ) : (
+                                            <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs font-medium border border-red-500/30">❌ Rejected</span>
+                                          )}
+                                          <button
+                                            onClick={() => {
+                                              const text = `${redemption.userEmail} - ${redemption.amount} - ${redemption.status}`
+                                              navigator.clipboard.writeText(text)
+                                            }}
+                                            className="p-1 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded transition-all duration-200"
+                                            title="Copy details"
+                                          >
+                                            <Copy size={12} />
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </>
+                    ))
                   ) : (
-                    filteredRedemptions.map((redemption, index) => (
-                      <tr
-                        key={redemption.id || index}
-                        className="group hover:bg-white/5 transition-all duration-200 hover:shadow-md border-l-2 border-transparent hover:border-blue-500/30"
-                        style={{ animationDelay: `${index * 0.02}s` }}
-                      >
+                    // Individual view (existing code)
+                    filteredRedemptions.map((item, index) => {
+                      const redemption = item as Redemption
+                      return (
+                        <tr
+                          key={redemption.id || index}
+                          className="group hover:bg-white/5 transition-all duration-200 hover:shadow-md border-l-2 border-transparent hover:border-blue-500/30"
+                          style={{ animationDelay: `${index * 0.02}s` }}
+                        >
                         <td className="px-6 py-4">
                           <div className="min-w-0">
                             <p className="text-sm font-medium text-blue-400 truncate">
@@ -545,19 +841,29 @@ export default function RedemptionsPage() {
                           )}
                         </td>
                         <td className="px-6 py-4 text-center">
-                          <button
-                            onClick={() => {
-                              const text = `${redemption.userEmail} - ${redemption.amount} - ${redemption.status}`
-                              navigator.clipboard.writeText(text)
-                            }}
-                            className="p-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-md transition-all duration-200"
-                            title="Copy details"
-                          >
-                            <Copy size={14} />
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleBanUser(redemption.userId)}
+                              className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 rounded-md transition-all duration-200"
+                              title="Ban User"
+                            >
+                              <UserX size={14} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                const text = `${redemption.userEmail} - ${redemption.amount} - ${redemption.status}`
+                                navigator.clipboard.writeText(text)
+                              }}
+                              className="p-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-md transition-all duration-200"
+                              title="Copy details"
+                            >
+                              <Copy size={14} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
-                    ))
+                      )
+                    })
                   )}
                 </tbody>
               </table>
@@ -568,7 +874,7 @@ export default function RedemptionsPage() {
               <div className="p-6 border-t border-white/10 flex items-center justify-between">
                 <div className="text-sm text-gray-400">
                   Showing <span className="font-medium text-white">{filteredRedemptions.length}</span> of{' '}
-                  <span className="font-medium text-white">{redemptions.length}</span> redemptions
+                  <span className="font-medium text-white">{groupByUser ? groupedRedemptionsArray.length : redemptions.length}</span> {groupByUser ? 'users' : 'redemptions'}
                 </div>
                 <button
                   onClick={handleExportRedemptions}
@@ -576,7 +882,7 @@ export default function RedemptionsPage() {
                   className="flex items-center gap-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 hover:text-green-300 rounded-lg transition-all duration-200 text-sm font-medium disabled:opacity-50"
                 >
                   <Download size={16} />
-                  Export CSV
+                  Export {groupByUser ? 'Grouped' : 'Detailed'} CSV
                 </button>
               </div>
             )}

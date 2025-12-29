@@ -227,3 +227,84 @@ export async function getAllUsersRealtimeData() {
     return { error: "Failed to fetch users data" }
   }
 }
+
+export async function addCoinsToUser(formData: FormData) {
+  const uid = formData.get('uid') as string
+  const coinsToAdd = parseInt(formData.get('coins') as string)
+
+  if (!uid || isNaN(coinsToAdd)) {
+    return { error: "Invalid user ID or coin amount" }
+  }
+
+  try {
+    const userRef = db.ref(`users/${uid}`)
+    const snapshot = await userRef.once('value')
+    const userData = snapshot.val() || {}
+
+    const currentCoins = userData.coins || 0
+    const newCoins = currentCoins + coinsToAdd
+
+    await userRef.update({
+      coins: newCoins,
+      totalEarned: (userData.totalEarned || 0) + coinsToAdd
+    })
+
+    revalidatePath('/users')
+    return { success: true, newCoins }
+  } catch (error) {
+    console.error('Error adding coins to user:', error)
+    return { error: "Failed to add coins" }
+  }
+}
+
+export async function setUserCoins(formData: FormData) {
+  const uid = formData.get('uid') as string
+  const newCoins = parseInt(formData.get('coins') as string)
+
+  if (!uid || isNaN(newCoins) || newCoins < 0) {
+    return { error: "Invalid user ID or coin amount" }
+  }
+
+  try {
+    const userRef = db.ref(`users/${uid}`)
+    await userRef.update({
+      coins: newCoins
+    })
+
+    revalidatePath('/users')
+    return { success: true, newCoins }
+  } catch (error) {
+    console.error('Error setting user coins:', error)
+    return { error: "Failed to set coins" }
+  }
+}
+
+export async function resetUserStats(formData: FormData) {
+  const uid = formData.get('uid') as string
+
+  if (!uid) {
+    return { error: "Invalid user ID" }
+  }
+
+  try {
+    const userRef = db.ref(`users/${uid}`)
+    const snapshot = await userRef.once('value')
+    const userData = snapshot.val() || {}
+
+    await userRef.update({
+      coins: 0,
+      adsWatchedToday: 0,
+      totalAdsWatched: 0,
+      totalEarned: 0,
+      lastAdWatch: null,
+      lastAdWatchAsLog: null,
+      lastRestDate: userData.lastRestDate || null
+    })
+
+    revalidatePath('/users')
+    return { success: true }
+  } catch (error) {
+    console.error('Error resetting user stats:', error)
+    return { error: "Failed to reset stats" }
+  }
+}

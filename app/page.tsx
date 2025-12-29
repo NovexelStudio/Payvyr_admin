@@ -38,28 +38,28 @@ export default function DashboardPage() {
     <div className="min-h-screen animated-gradient">
       <Navigation />
 
-      <main className="p-4 md:p-10 font-sans text-gray-100">
-        <div className="max-w-7xl mx-auto">
+      <main className="p-6 md:p-8 font-sans text-gray-100">
+        <div className="max-w-6xl mx-auto">
 
           {/* HEADER */}
-          <div className="mb-12">
-            <h1 className="text-5xl font-black tracking-tight gradient-text mb-4">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold tracking-tight gradient-text mb-3">
               Dashboard
             </h1>
-            <p className="text-gray-400 text-lg">Welcome to your admin control center</p>
-            <div className="w-24 h-1 bg-gradient-to-r from-[#D62323] to-[#ff4757] rounded-full mt-4"></div>
+            <p className="text-gray-400 text-base">Welcome to your admin control center</p>
+            <div className="w-20 h-0.5 bg-gradient-to-r from-red-500 to-red-600 rounded-full mt-4"></div>
           </div>
 
           {/* QUICK STATS */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
             <div className="card hover-lift group">
               <div className="flex items-center gap-4">
-                <div className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl text-white group-hover:scale-110 transition-transform">
-                  <Ticket size={28} />
+                <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg text-white group-hover:scale-105 transition-transform shadow-sm">
+                  <Ticket size={24} />
                 </div>
                 <div>
                   <p className="text-sm text-gray-400 font-medium mb-1">Total Codes</p>
-                  <p className="text-3xl font-bold text-white">{totalCodes}</p>
+                  <p className="text-2xl font-bold text-white">{totalCodes}</p>
                   <p className="text-xs text-gray-500 mt-1">All time</p>
                 </div>
               </div>
@@ -67,25 +67,25 @@ export default function DashboardPage() {
 
             <div className="card hover-lift group">
               <div className="flex items-center gap-4">
-                <div className="p-4 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl text-white group-hover:scale-110 transition-transform">
-                  <TrendingUp size={28} />
+                <div className="p-3 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-lg text-white group-hover:scale-105 transition-transform shadow-sm">
+                  <TrendingUp size={24} />
                 </div>
                 <div>
                   <p className="text-sm text-gray-400 font-medium mb-1">Usage Rate</p>
-                  <p className="text-3xl font-bold text-white">{usageRate}%</p>
-                  <p className="text-xs text-green-400 mt-1">+2.5% from last week</p>
+                  <p className="text-2xl font-bold text-white">{usageRate}%</p>
+                  <p className="text-xs text-emerald-400 mt-1">+2.5% from last week</p>
                 </div>
               </div>
             </div>
 
             <div className="card hover-lift group">
               <div className="flex items-center gap-4">
-                <div className="p-4 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl text-white group-hover:scale-110 transition-transform">
-                  <Zap size={28} />
+                <div className="p-3 bg-gradient-to-br from-purple-600 to-purple-700 rounded-lg text-white group-hover:scale-105 transition-transform shadow-sm">
+                  <Zap size={24} />
                 </div>
                 <div>
                   <p className="text-sm text-gray-400 font-medium mb-1">Available</p>
-                  <p className="text-3xl font-bold text-white">{availableCodes}</p>
+                  <p className="text-2xl font-bold text-white">{availableCodes}</p>
                   <p className="text-xs text-purple-400 mt-1">Ready to use</p>
                 </div>
               </div>
@@ -93,12 +93,12 @@ export default function DashboardPage() {
 
             <div className="card hover-lift group">
               <div className="flex items-center gap-4">
-                <div className="p-4 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl text-white group-hover:scale-110 transition-transform">
-                  <Shield size={28} />
+                <div className="p-3 bg-gradient-to-br from-green-600 to-green-700 rounded-lg text-white group-hover:scale-105 transition-transform shadow-sm">
+                  <Shield size={24} />
                 </div>
                 <div>
                   <p className="text-sm text-gray-400 font-medium mb-1">System Status</p>
-                  <p className="text-3xl font-bold text-green-400">Online</p>
+                  <p className="text-2xl font-bold text-green-400">Online</p>
                   <p className="text-xs text-gray-500 mt-1">All systems operational</p>
                 </div>
               </div>
@@ -106,88 +106,88 @@ export default function DashboardPage() {
           </div>
 
           {/* QUICK ACTIONS */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             <Link href="/users" className="group card hover-lift">
-              <div className="flex items-center justify-between mb-6">
-                <div className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl text-white group-hover:scale-110 transition-all duration-300 shadow-lg">
-                  <Users size={28} />
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg text-white group-hover:scale-105 transition-all duration-300 shadow-sm">
+                  <Users size={24} />
                 </div>
-                <ArrowRight className="text-gray-400 group-hover:text-blue-400 transition-colors" size={24} />
+                <ArrowRight className="text-gray-400 group-hover:text-blue-400 transition-colors" size={20} />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-3">User Management</h3>
+              <h3 className="text-xl font-semibold text-white mb-2">User Management</h3>
               <p className="text-gray-400 text-sm leading-relaxed">View all users, ban/unban accounts, and manage access permissions.</p>
               <div className="mt-4 flex items-center gap-2 text-blue-400 text-sm font-medium">
                 <span>Manage Users</span>
-                <ArrowRight size={16} />
+                <ArrowRight size={14} />
               </div>
             </Link>
 
             <Link href="/codes" className="group card hover-lift">
-              <div className="flex items-center justify-between mb-6">
-                <div className="p-4 bg-gradient-to-br from-[#D62323] to-[#ff4757] rounded-xl text-white group-hover:scale-110 transition-all duration-300 shadow-lg">
-                  <Ticket size={28} />
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-gradient-to-br from-red-600 to-red-700 rounded-lg text-white group-hover:scale-105 transition-all duration-300 shadow-sm">
+                  <Ticket size={24} />
                 </div>
-                <ArrowRight className="text-gray-400 group-hover:text-[#D62323] transition-colors" size={24} />
+                <ArrowRight className="text-gray-400 group-hover:text-red-400 transition-colors" size={20} />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-3">Code Management</h3>
+              <h3 className="text-xl font-semibold text-white mb-2">Code Management</h3>
               <p className="text-gray-400 text-sm leading-relaxed">Add new codes, view usage statistics, and clean up used codes.</p>
-              <div className="mt-4 flex items-center gap-2 text-[#D62323] text-sm font-medium">
+              <div className="mt-4 flex items-center gap-2 text-red-400 text-sm font-medium">
                 <span>Manage Codes</span>
-                <ArrowRight size={16} />
+                <ArrowRight size={14} />
               </div>
             </Link>
 
             <Link href="/analytics" className="group card hover-lift">
-              <div className="flex items-center justify-between mb-6">
-                <div className="p-4 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl text-white group-hover:scale-110 transition-all duration-300 shadow-lg">
-                  <BarChart3 size={28} />
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-gradient-to-br from-purple-600 to-purple-700 rounded-lg text-white group-hover:scale-105 transition-all duration-300 shadow-sm">
+                  <BarChart3 size={24} />
                 </div>
-                <ArrowRight className="text-gray-400 group-hover:text-purple-400 transition-colors" size={24} />
+                <ArrowRight className="text-gray-400 group-hover:text-purple-400 transition-colors" size={20} />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-3">Analytics</h3>
+              <h3 className="text-xl font-semibold text-white mb-2">Analytics</h3>
               <p className="text-gray-400 text-sm leading-relaxed">Detailed insights, trends, and system performance metrics.</p>
               <div className="mt-4 flex items-center gap-2 text-purple-400 text-sm font-medium">
                 <span>View Analytics</span>
-                <ArrowRight size={16} />
+                <ArrowRight size={14} />
               </div>
             </Link>
           </div>
 
           {/* RECENT ACTIVITY */}
           <div className="card">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl text-white">
-                <Activity size={24} />
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-gradient-to-br from-orange-600 to-orange-700 rounded-lg text-white">
+                <Activity size={20} />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">Recent Activity</h2>
+                <h2 className="text-xl font-semibold text-white">Recent Activity</h2>
                 <p className="text-gray-400 text-sm">Latest code redemptions and system events</p>
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {loading ? (
-                <div className="flex items-center justify-center py-12">
+                <div className="flex items-center justify-center py-8">
                   <div className="spinner"></div>
                   <span className="ml-3 text-gray-400">Loading recent activity...</span>
                 </div>
               ) : codes.slice(0, 5).map((code, index) => (
                 <div
                   key={code.id}
-                  className="flex items-center justify-between p-6 bg-white/5 rounded-2xl hover:bg-white/10 transition-all duration-300 border border-white/5 hover:border-white/10"
+                  className="flex items-center justify-between p-4 bg-white/5 rounded-lg hover:bg-white/8 transition-all duration-300 border border-white/5 hover:border-white/10"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`p-3 rounded-xl ${code.used ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`}>
-                      <Ticket size={20} />
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${code.used ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`}>
+                      <Ticket size={16} />
                     </div>
                     <div>
-                      <p className="font-semibold text-white text-lg">{code.code}</p>
-                      <p className="text-sm text-gray-400">{code.amount} • {code.used ? 'Redeemed' : 'Available'}</p>
+                      <p className="font-medium text-white text-sm">{code.code}</p>
+                      <p className="text-xs text-gray-400">{code.amount} • {code.used ? 'Redeemed' : 'Available'}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-400">
+                    <p className="text-xs text-gray-400">
                       {new Date(code.created_at).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -205,13 +205,13 @@ export default function DashboardPage() {
               ))}
             </div>
 
-            <div className="mt-8 text-center">
+            <div className="mt-6 text-center">
               <Link
                 href="/codes"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-[#D62323] to-[#ff4757] text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 hover-lift"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-500 text-white px-5 py-2.5 rounded-lg font-medium hover:shadow-lg transition-all duration-300 hover-lift text-sm"
               >
                 <span>View All Codes</span>
-                <ArrowRight size={18} />
+                <ArrowRight size={16} />
               </Link>
             </div>
           </div>
