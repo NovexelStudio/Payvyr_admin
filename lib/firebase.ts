@@ -1,5 +1,6 @@
-import { initializeApp, getApps, FirebaseApp } from 'firebase/app'
-import { getDatabase, Database } from 'firebase/database'
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
+import { getDatabase, Database } from 'firebase/database';
+import { getAuth, Auth } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -9,16 +10,11 @@ const firebaseConfig = {
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
   databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-}
+};
 
-// Initialize Firebase only if it hasn't been initialized and we're in the browser
-let app: FirebaseApp | undefined
-let database: Database | undefined
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+const database = getDatabase(app);
+const auth = getAuth(app);
 
-if (typeof window !== 'undefined') {
-  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
-  database = getDatabase(app)
-}
-
-export { database }
-export default app
+export { database, auth };
+export default app;
