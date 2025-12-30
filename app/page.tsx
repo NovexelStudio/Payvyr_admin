@@ -18,12 +18,19 @@ interface RedeemCode {
 export default function DashboardPage() {
   const [codes, setCodes] = useState<RedeemCode[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchCodes = async () => {
-      const data = await getRedeemCodes()
-      setCodes(data)
-      setLoading(false)
+      try {
+        const data = await getRedeemCodes()
+        setCodes(data)
+      } catch (err) {
+        console.error('Failed to fetch codes:', err)
+        setError('Failed to load redeem codes')
+      } finally {
+        setLoading(false)
+      }
     }
     fetchCodes()
   }, [])
@@ -33,6 +40,28 @@ export default function DashboardPage() {
   const usedCodes = codes.filter(c => c.used).length
   const availableCodes = totalCodes - usedCodes
   const usageRate = totalCodes > 0 ? ((usedCodes / totalCodes) * 100).toFixed(1) : '0'
+
+  if (error) {
+    return (
+      <div className="min-h-screen animated-gradient">
+        <Navigation />
+        <main className="p-6 md:p-8 font-sans text-gray-100">
+          <div className="max-w-6xl mx-auto text-center">
+            <div className="card">
+              <h2 className="text-2xl font-bold mb-4 text-red-400">Error</h2>
+              <p className="text-gray-400 mb-4">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen animated-gradient">

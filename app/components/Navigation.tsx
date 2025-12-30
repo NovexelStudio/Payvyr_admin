@@ -3,9 +3,9 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, Users, Ticket, BarChart3, Menu, X, Gift } from 'lucide-react'
-import { useState } from 'react'
+import { useState, memo } from 'react'
 
-export default function Navigation() {
+const Navigation = memo(function Navigation() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -92,4 +92,8 @@ export default function Navigation() {
       </div>
     </nav>
   )
-}
+})
+
+Navigation.displayName = 'Navigation'
+
+export default Navigation
