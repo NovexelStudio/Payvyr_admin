@@ -362,7 +362,7 @@ export default function UsersPage() {
                         <TrendingUp size={16} className="text-green-400" />
                         <p className="text-xs text-gray-400 uppercase tracking-wide">Total Earned</p>
                       </div>
-                      <p className="text-2xl font-bold text-green-400">R{userRealtimeData.totalEarned}</p>
+                      <p className="text-2xl font-bold text-green-400">₹ {userRealtimeData.totalEarned}</p>
                     </div>
 
                     <div className="bg-white/5 rounded-lg p-4 border border-white/5">
@@ -482,7 +482,7 @@ export default function UsersPage() {
                         </td>
                         <td className="p-6">
                           <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-bold border border-green-500/30">
-                            R{allUsersRealtimeData[user.uid]?.totalEarned || 0}
+                            ₹{allUsersRealtimeData[user.uid]?.totalEarned || 0}
                           </span>
                         </td>
                         <td className="p-6">
@@ -573,7 +573,7 @@ export default function UsersPage() {
                     </div>
                     <div>
                       <span className="text-gray-400">Total Earned:</span>
-                      <span className="text-green-400 font-bold ml-2">R{selectedUserRealtimeData.totalEarned || 0}</span>
+                      <span className="text-green-400 font-bold ml-2">₹{selectedUserRealtimeData.totalEarned || 0}</span>
                     </div>
                   </div>
                 </div>

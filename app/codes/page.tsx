@@ -467,10 +467,10 @@ export default function CodesPage() {
                     </label>
                     <select name="amount" className="custom-input w-full group-hover:border-[#D62323]/50 transition-colors" required>
                       <option value="" className="bg-slate-700">Select Amount</option>
-                      <option value="R10" className="bg-slate-700">💰 R10 - Small Reward</option>
-                      <option value="R20" className="bg-slate-700">💎 R20 - Medium Reward</option>
-                      <option value="R50" className="bg-slate-700">🏆 R50 - Large Reward</option>
-                      <option value="R100" className="bg-slate-700">👑 R100 - Premium Reward</option>
+                      <option value="R10" className="bg-slate-700">💰 ₹10 - Small Reward</option>
+                      <option value="R20" className="bg-slate-700">💎 ₹20 - Medium Reward</option>
+                      <option value="R50" className="bg-slate-700">🏆 ₹50 - Large Reward</option>
+                      <option value="R100" className="bg-slate-700">👑 ₹100 - Premium Reward</option>
                     </select>
                     <p className="text-xs text-gray-500 mt-2">Choose the monetary value for this code</p>
                   </div>
@@ -505,10 +505,10 @@ export default function CodesPage() {
                         className="custom-input w-full group-hover:border-red-500/50 transition-colors"
                       >
                         <option value="" className="bg-slate-700">Select Amount to Remove</option>
-                        <option value="R10" className="bg-slate-700">🗑️ R10 (Used: {usedByAmount['R10'] || 0})</option>
-                        <option value="R20" className="bg-slate-700">🗑️ R20 (Used: {usedByAmount['R20'] || 0})</option>
-                        <option value="R50" className="bg-slate-700">🗑️ R50 (Used: {usedByAmount['R50'] || 0})</option>
-                        <option value="R100" className="bg-slate-700">🗑️ R100 (Used: {usedByAmount['R100'] || 0})</option>
+                        <option value="R10" className="bg-slate-700">🗑️ ₹10 (Used: {usedByAmount['R10'] || 0})</option>
+                        <option value="R20" className="bg-slate-700">🗑️ ₹20 (Used: {usedByAmount['R20'] || 0})</option>
+                        <option value="R50" className="bg-slate-700">🗑️ ₹50 (Used: {usedByAmount['R50'] || 0})</option>
+                        <option value="R100" className="bg-slate-700">🗑️ ₹100 (Used: {usedByAmount['R100'] || 0})</option>
                       </select>
                       <p className="text-xs text-gray-500 mt-2">This will permanently delete all used codes of the selected value</p>
                     </div>
@@ -622,10 +622,10 @@ export default function CodesPage() {
                             className="custom-input w-full group-hover:border-red-500/50 transition-colors"
                           >
                             <option value="all" className="bg-slate-700">All Amounts</option>
-                            <option value="R10" className="bg-slate-700">💰 R10</option>
-                            <option value="R20" className="bg-slate-700">💎 R20</option>
-                            <option value="R50" className="bg-slate-700">🏆 R50</option>
-                            <option value="R100" className="bg-slate-700">👑 R100</option>
+                            <option value="R10" className="bg-slate-700">💰 ₹10</option>
+                            <option value="R20" className="bg-slate-700">💎 ₹20</option>
+                            <option value="R50" className="bg-slate-700">🏆 ₹50</option>
+                            <option value="R100" className="bg-slate-700">👑 ₹100</option>
                           </select>
                         </div>
                         <div className="group">

@@ -55,23 +55,26 @@ export default function AnalyticsPage() {
 
   // Amount breakdown
   const amountStats = codes.reduce((acc, c) => {
-    acc[c.amount] = (acc[c.amount] || 0) + 1
+    // Standardize the display by replacing R with ₹ if present in the raw data
+    const displayAmount = c.amount.replace('R', '₹')
+    acc[displayAmount] = (acc[displayAmount] || 0) + 1
     return acc
   }, {} as Record<string, number>)
 
   const usedByAmount = codes.filter(c => c.used).reduce((acc, c) => {
-    acc[c.amount] = (acc[c.amount] || 0) + 1
+    const displayAmount = c.amount.replace('R', '₹')
+    acc[displayAmount] = (acc[displayAmount] || 0) + 1
     return acc
   }, {} as Record<string, number>)
 
-  // Calculate potential revenue (if codes represent monetary value)
+  // Calculate revenue (Handles both 'R' and '₹' prefixes during calculation)
   const potentialRevenue = codes.reduce((sum, c) => {
-    const value = parseInt(c.amount.replace('R', '')) || 0
+    const value = parseInt(c.amount.replace(/[R₹]/g, '')) || 0
     return sum + value
   }, 0)
 
   const actualRevenue = codes.filter(c => c.used).reduce((sum, c) => {
-    const value = parseInt(c.amount.replace('R', '')) || 0
+    const value = parseInt(c.amount.replace(/[R₹]/g, '')) || 0
     return sum + value
   }, 0)
 
@@ -176,8 +179,8 @@ export default function AnalyticsPage() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-400 font-medium mb-1">Revenue</p>
-                  <p className="text-3xl font-bold text-white">R{actualRevenue}</p>
-                  <p className="text-xs text-orange-400 mt-1">of R{potentialRevenue} potential</p>
+                  <p className="text-3xl font-bold text-white">₹{actualRevenue}</p>
+                  <p className="text-xs text-orange-400 mt-1">of ₹{potentialRevenue} potential</p>
                 </div>
               </div>
             </div>
@@ -205,7 +208,7 @@ export default function AnalyticsPage() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-400">Potential Revenue</p>
-                      <p className="text-xl font-bold text-white">R{potentialRevenue}</p>
+                      <p className="text-xl font-bold text-white">₹{potentialRevenue}</p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -220,7 +223,7 @@ export default function AnalyticsPage() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-400">Actual Revenue</p>
-                      <p className="text-xl font-bold text-white">R{actualRevenue}</p>
+                      <p className="text-xl font-bold text-white">₹{actualRevenue}</p>
                     </div>
                   </div>
                   <div className="text-right">
