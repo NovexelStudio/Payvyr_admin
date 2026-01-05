@@ -67,6 +67,8 @@ export default function RedemptionsPage() {
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set())
   const [groupByUser, setGroupByUser] = useState(true)
   const [groupedRedemptionsArray, setGroupedRedemptionsArray] = useState<any[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
 
   useEffect(() => {
     loadData()
@@ -245,6 +247,37 @@ export default function RedemptionsPage() {
 
     setFilteredRedemptions(sortedData)
   }, [redemptions, search, statusFilter, dateFilter, sortBy, sortOrder, groupByUser])
+
+  // Pagination logic - reactive to itemsPerPage changes
+  const [paginatedItems, setPaginatedItems] = useState<(Redemption | GroupedUser)[]>([])
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
+
+  useEffect(() => {
+    const items = filteredRedemptions.length
+    const pages = Math.ceil(items / itemsPerPage)
+    const start = (currentPage - 1) * itemsPerPage
+    const end = start + itemsPerPage
+    const paginated = filteredRedemptions.slice(start, end)
+
+    setTotalItems(items)
+    setTotalPages(pages)
+    setPaginatedItems(paginated)
+  }, [filteredRedemptions, itemsPerPage, currentPage])
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [search, statusFilter, dateFilter, sortBy, sortOrder, groupByUser, itemsPerPage])
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage)
+    setCurrentPage(1) // Reset to first page
+  }
 
   const handleSort = (column: typeof sortBy) => {
     if (sortBy === column) {
@@ -473,7 +506,7 @@ export default function RedemptionsPage() {
                   {groupByUser ? '📊 Grouped View' : '📋 List View'}
                 </button>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-white">{filteredRedemptions.length}</p>
+                  <p className="text-2xl font-bold text-white">{totalItems}</p>
                   <p className="text-sm text-gray-400">of {groupByUser ? groupedRedemptionsArray.length : redemptions.length} {groupByUser ? 'users' : 'redemptions'}</p>
                 </div>
               </div>
@@ -555,7 +588,7 @@ export default function RedemptionsPage() {
                   <div className="flex justify-between items-center mt-6 pt-4 border-t border-white/10">
                     <span className="text-sm text-gray-400 flex items-center gap-2">
                       <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                      Showing {filteredRedemptions.length} of {redemptions.length} redemptions
+                      Showing {totalItems} of {redemptions.length} redemptions
                     </span>
                     <button
                       onClick={() => {
@@ -651,7 +684,7 @@ export default function RedemptionsPage() {
                     </tr>
                   ) : groupByUser ? (
                     // Grouped view
-                    filteredRedemptions.map((userGroup: any, index) => (
+                    paginatedItems.map((userGroup: any, index) => (
                       <>
                         <tr
                           key={userGroup.userId}
@@ -726,8 +759,9 @@ export default function RedemptionsPage() {
                                 e.stopPropagation()
                                 handleBanUser(userGroup.userId)
                               }}
-                              className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 rounded-md transition-all duration-200"
-                              title="Ban User"
+                              disabled={userGroup.userEmail === 'Unknown User'}
+                              className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 rounded-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                              title={userGroup.userEmail === 'Unknown User' ? 'Cannot ban unknown user' : 'Ban User'}
                             >
                               <UserX size={14} />
                             </button>
@@ -784,7 +818,7 @@ export default function RedemptionsPage() {
                     ))
                   ) : (
                     // Individual view (existing code)
-                    filteredRedemptions.map((item, index) => {
+                    paginatedItems.map((item, index) => {
                       const redemption = item as Redemption
                       return (
                         <tr
@@ -843,9 +877,10 @@ export default function RedemptionsPage() {
                         <td className="px-6 py-4 text-center">
                           <div className="flex gap-2">
                             <button
-                              onClick={() => handleBanUser(redemption.userId)}
-                              className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 rounded-md transition-all duration-200"
-                              title="Ban User"
+                              onClick={(e) => handleBanUser(redemption.userId)}
+                              disabled={redemption.userEmail === 'Unknown User'}
+                              className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 rounded-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                              title={redemption.userEmail === 'Unknown User' ? 'Cannot ban unknown user' : 'Ban User'}
                             >
                               <UserX size={14} />
                             </button>
@@ -869,12 +904,90 @@ export default function RedemptionsPage() {
               </table>
             </div>
 
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="p-6 border-t border-white/10">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-400">
+                    Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} {groupByUser ? 'users' : 'redemptions'}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="p-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Previous page"
+                    >
+                      <ChevronRight size={16} className="rotate-180" />
+                    </button>
+
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        let pageNum
+                        if (totalPages <= 5) {
+                          pageNum = i + 1
+                        } else if (currentPage <= 3) {
+                          pageNum = i + 1
+                        } else if (currentPage >= totalPages - 2) {
+                          pageNum = totalPages - 4 + i
+                        } else {
+                          pageNum = currentPage - 2 + i
+                        }
+
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => handlePageChange(pageNum)}
+                            className={`px-3 py-1 rounded-lg text-sm font-medium transition-all duration-200 ${
+                              currentPage === pageNum
+                                ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                                : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        )
+                      })}
+                    </div>
+
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="p-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Next page"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Footer with Export */}
             {filteredRedemptions.length > 0 && (
               <div className="p-6 border-t border-white/10 flex items-center justify-between">
-                <div className="text-sm text-gray-400">
-                  Showing <span className="font-medium text-white">{filteredRedemptions.length}</span> of{' '}
-                  <span className="font-medium text-white">{groupByUser ? groupedRedemptionsArray.length : redemptions.length}</span> {groupByUser ? 'users' : 'redemptions'}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-400">Rows per page:</span>
+                    <select
+                      value={itemsPerPage}
+                      onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                      className="custom-input text-sm px-2 py-1 w-16"
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                    </select>
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    Page <span className="font-medium text-white">{currentPage}</span> of{' '}
+                    <span className="font-medium text-white">{totalPages}</span> •{' '}
+                    Showing <span className="font-medium text-white">{paginatedItems.length}</span> of{' '}
+                    <span className="font-medium text-white">{totalItems}</span> {groupByUser ? 'users' : 'redemptions'}
+                  </div>
                 </div>
                 <button
                   onClick={handleExportRedemptions}

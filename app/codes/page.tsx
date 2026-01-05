@@ -53,13 +53,8 @@ export default function CodesPage() {
       ])]
 
       const emailPromises = uniqueUids.map(async (uid) => {
-        try {
-          const result = await getUserInfo(uid)
-          return { uid, email: result.user?.email || 'Unknown User' }
-        } catch (error) {
-          console.error(`Failed to fetch user info for ${uid}:`, error)
-          return { uid, email: 'Unknown User' }
-        }
+        const result = await getUserInfo(uid)
+        return { uid, email: result.user ? result.user.email || 'Unknown User' : 'Unknown User' }
       })
 
       const emailResults = await Promise.all(emailPromises)
@@ -308,7 +303,7 @@ export default function CodesPage() {
                   <p className="text-sm text-gray-400 font-medium mb-1">Total Codes</p>
                   <p className="text-3xl font-bold text-white">{totalCodes}</p>
                   <p className="text-xs text-blue-400 mt-1 flex items-center gap-1">
-                    <div className="w-1 h-1 bg-blue-400 rounded-full animate-pulse"></div>
+                    <span className="w-1 h-1 bg-blue-400 rounded-full"></span>
                     All time created
                   </p>
                 </div>
@@ -325,7 +320,7 @@ export default function CodesPage() {
                   <p className="text-sm text-gray-400 font-medium mb-1">Used Codes</p>
                   <p className="text-3xl font-bold text-white">{usedCodes}</p>
                   <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
-                    <div className="w-1 h-1 bg-red-400 rounded-full animate-pulse"></div>
+                    <span className="w-1 h-1 bg-red-400 rounded-full"></span>
                     Successfully redeemed
                   </p>
                 </div>
@@ -342,7 +337,7 @@ export default function CodesPage() {
                   <p className="text-sm text-gray-400 font-medium mb-1">Available</p>
                   <p className="text-3xl font-bold text-white">{availableCodes}</p>
                   <p className="text-xs text-green-400 mt-1 flex items-center gap-1">
-                    <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="w-1 h-1 bg-green-400 rounded-full"></span>
                     Ready for use
                   </p>
                 </div>
@@ -359,7 +354,7 @@ export default function CodesPage() {
                   <p className="text-sm text-gray-400 font-medium mb-1">Cleanup Ready</p>
                   <p className="text-3xl font-bold text-white">{usedCodes}</p>
                   <p className="text-xs text-orange-400 mt-1 flex items-center gap-1">
-                    <div className="w-1 h-1 bg-orange-400 rounded-full animate-pulse"></div>
+                    <span className="w-1 h-1 bg-orange-400 rounded-full"></span>
                     Can be removed
                   </p>
                 </div>
@@ -552,7 +547,7 @@ export default function CodesPage() {
                       <p className="text-2xl font-bold text-white">{filteredCodes.length}</p>
                       <p className="text-sm text-gray-400">of {codes.length} codes</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                         <span className="text-xs text-green-400">Live</span>
                       </div>
                     </div>
@@ -587,7 +582,7 @@ export default function CodesPage() {
                           : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white hover:shadow-lg'
                       }`}
                     >
-                      <Filter size={18} className={showFilters ? 'animate-pulse' : ''} />
+                      <Filter size={18} />
                       <span className="text-sm hidden sm:inline">Filters</span>
                     </button>
                   </div>

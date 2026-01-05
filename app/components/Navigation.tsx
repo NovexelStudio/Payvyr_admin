@@ -34,13 +34,13 @@ const Navigation = memo(function Navigation() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 hover-lift ${
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 hover-lift group ${
                       isActive
-                        ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg'
-                        : 'text-gray-300 hover:text-white hover:bg-white/5'
+                        ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg scale-105'
+                        : 'text-gray-300 hover:text-white hover:bg-white/5 hover:scale-102'
                     }`}
                   >
-                    <Icon size={18} className={isActive ? 'animate-pulse' : ''} />
+                    <Icon size={18} className={`${isActive ? 'animate-pulse' : 'group-hover:rotate-12'} transition-transform duration-300`} />
                     {item.label}
                   </Link>
                 )
@@ -76,13 +76,13 @@ const Navigation = memo(function Navigation() {
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-lg text-sm font-medium transition-all duration-300 ${
+                    className={`flex flex-col items-center gap-2 p-4 rounded-lg text-sm font-medium transition-all duration-300 group ${
                       isActive
-                        ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg'
-                        : 'text-gray-300 hover:text-white hover:bg-white/5'
+                        ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg scale-105'
+                        : 'text-gray-300 hover:text-white hover:bg-white/5 hover:scale-102'
                     }`}
                   >
-                    <Icon size={20} className={isActive ? 'animate-bounce' : ''} />
+                    <Icon size={20} className={`${isActive ? 'animate-bounce' : 'group-hover:rotate-12'} transition-transform duration-300`} />
                     {item.label}
                   </Link>
                 )

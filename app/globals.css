@@ -101,6 +101,19 @@ body {
   100% { transform: rotate(360deg); }
 }
 
+/* Custom scale utilities */
+.hover\:scale-102:hover {
+  transform: scale(1.02);
+}
+
+.scale-102 {
+  transform: scale(1.02);
+}
+
+.scale-105 {
+  transform: scale(1.05);
+}
+
 /* Custom input styles */
 .custom-input {
   background: rgba(255, 255, 255, 0.05);

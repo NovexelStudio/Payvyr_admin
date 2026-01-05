@@ -78,7 +78,6 @@ export async function getUserInfo(uid: string) {
       }
     }
   } catch (error) {
-    console.error('Error fetching user:', error)
     return { error: "User not found" }
   }
 }
@@ -313,7 +312,29 @@ export async function getDeviceBindings() {
   try {
     const snapshot = await db.ref('device_bindings').once('value')
     const data = snapshot.val()
-    return { deviceBindings: data || {} }
+    
+    // Fetch user emails for each binding
+    const deviceBindingsWithEmails: Record<string, any> = {}
+    if (data) {
+      for (const [deviceId, binding] of Object.entries(data)) {
+        const userInfo = await getUserInfo((binding as any).uid)
+        if (userInfo.error) {
+          // User doesn't exist in Firebase Auth, use placeholder
+          console.warn(`User ${(binding as any).uid} not found in Firebase Auth for device ${deviceId}`)
+          deviceBindingsWithEmails[deviceId] = {
+            ...(binding as any),
+            userEmail: 'Unknown User'
+          }
+        } else {
+          deviceBindingsWithEmails[deviceId] = {
+            ...(binding as any),
+            userEmail: userInfo.user?.email || 'Unknown User'
+          }
+        }
+      }
+    }
+    
+    return { deviceBindings: deviceBindingsWithEmails }
   } catch (error) {
     console.error('Error fetching device bindings:', error)
     return { error: "Failed to fetch device bindings" }
