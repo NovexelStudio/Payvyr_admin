@@ -308,3 +308,14 @@ export async function resetUserStats(formData: FormData) {
     return { error: "Failed to reset stats" }
   }
 }
+
+export async function getDeviceBindings() {
+  try {
+    const snapshot = await db.ref('device_bindings').once('value')
+    const data = snapshot.val()
+    return { deviceBindings: data || {} }
+  } catch (error) {
+    console.error('Error fetching device bindings:', error)
+    return { error: "Failed to fetch device bindings" }
+  }
+}
