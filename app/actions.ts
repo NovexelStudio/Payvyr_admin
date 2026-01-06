@@ -340,3 +340,60 @@ export async function getDeviceBindings() {
     return { error: "Failed to fetch device bindings" }
   }
 }
+
+export async function getSupportMessages() {
+  try {
+    const snapshot = await db.ref('support_messages').once('value')
+    const data = snapshot.val()
+    return { supportMessages: data || {} }
+  } catch (error) {
+    console.error('Error fetching support messages:', error)
+    return { error: "Failed to fetch support messages" }
+  }
+}
+
+export async function saveSupportReply(formData: FormData) {
+  const messageId = formData.get('messageId') as string
+  const replyText = formData.get('replyText') as string
+
+  if (!messageId || !replyText) {
+    return { error: "Message ID and reply text are required" }
+  }
+
+  try {
+    const messageRef = db.ref(`support_messages/${messageId}`)
+    
+    await messageRef.update({
+      replyText: replyText,
+      replyTimestamp: Date.now(),
+      status: "replied",
+      isRead: false
+    })
+
+    revalidatePath('/support-messages')
+    return { success: true }
+  } catch (error) {
+    console.error('Error saving support reply:', error)
+    return { error: "Failed to save reply" }
+  }
+}
+
+export async function toggleMessageReadStatus(formData: FormData) {
+  const messageId = formData.get('messageId') as string
+  const currentReadStatus = formData.get('currentReadStatus') === 'true'
+
+  if (!messageId) {
+    return { error: "Message ID is required" }
+  }
+
+  try {
+    const messageRef = db.ref(`support_messages/${messageId}`)
+    await messageRef.update({ read: !currentReadStatus })
+
+    revalidatePath('/support-messages')
+    return { success: true }
+  } catch (error) {
+    console.error('Error toggling read status:', error)
+    return { error: "Failed to update read status" }
+  }
+}

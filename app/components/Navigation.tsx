@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, Ticket, BarChart3, Menu, X, Gift, Smartphone } from 'lucide-react'
+import { Home, Users, Ticket, BarChart3, Menu, X, Gift, Smartphone, MessageSquare } from 'lucide-react'
 import { useState, memo } from 'react'
 
 const Navigation = memo(function Navigation() {
@@ -15,6 +15,7 @@ const Navigation = memo(function Navigation() {
     { href: '/codes', label: 'Codes', icon: Ticket },
     { href: '/redemptions', label: 'Redemptions', icon: Gift },
     { href: '/device-bindings', label: 'Device Bindings', icon: Smartphone },
+    { href: '/support-messages', label: 'Support Messages', icon: MessageSquare },
     { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   ]
 
