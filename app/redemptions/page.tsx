@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Navigation from '@/app/components/Navigation'
+import Navigation from '@/components/Navigation'
 import { Download, Search, Filter, X, Copy, Gift, UserX, ChevronDown, ChevronRight } from 'lucide-react'
 import { getRedemptions, getAllUsers, banUser } from '@/app/actions'
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { getDeviceBindings } from '../actions'
-import Navigation from '../components/Navigation'
+import Navigation from '../../components/Navigation'
 import { Smartphone, MapPin, Clock, User, Search, Filter, X, Download, Copy, Calendar, Globe, ChevronDown, ChevronUp } from 'lucide-react'
 import { useState, useEffect } from 'react'
 

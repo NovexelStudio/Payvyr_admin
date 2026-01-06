@@ -1,7 +1,7 @@
 'use client'
 
 import { getRedeemCodes } from './actions'
-import Navigation from './components/Navigation'
+import Navigation from '../components/Navigation'
 import { Ticket, Users, TrendingUp, BarChart3, ArrowRight, Activity, Zap, Shield } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'

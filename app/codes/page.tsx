@@ -1,7 +1,7 @@
 'use client'
 
 import { addRedeemCode, getRedeemCodes, removeUsedCodesByValue, deleteRedeemCode, getUserInfo } from '../actions'
-import Navigation from '../components/Navigation'
+import Navigation from '../../components/Navigation'
 import { PlusCircle, Ticket, Search, Trash2, AlertTriangle, Filter, X, BarChart3, Calendar, ChevronUp, ChevronDown, CheckSquare, Square, Download, Copy } from 'lucide-react'
 import { useState, useEffect } from 'react'
 

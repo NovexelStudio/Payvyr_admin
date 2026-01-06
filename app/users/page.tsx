@@ -1,7 +1,7 @@
 'use client'
 
 import { banUser, unbanUser, getUserInfo, getAllUsers, getUserRealtimeData, getAllUsersRealtimeData, addCoinsToUser, setUserCoins, resetUserStats } from '../actions'
-import Navigation from '../components/Navigation'
+import Navigation from '../../components/Navigation'
 import { ShieldAlert, UserCheck, UserX, Users, Search, Crown, Coins, Eye, TrendingUp, Calendar, Activity, Plus, Settings, RotateCcw, X } from 'lucide-react'
 import { useState } from 'react'
 

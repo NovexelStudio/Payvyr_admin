@@ -1,7 +1,7 @@
 'use client'
 
 import { getRedeemCodes, getAllUsers } from '../actions'
-import Navigation from '../components/Navigation'
+import Navigation from '../../components/Navigation'
 import { BarChart3, Users, Ticket, TrendingUp, Calendar, DollarSign, PieChart, Activity, Target, Zap } from 'lucide-react'
 import { useState, useEffect } from 'react'
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Navigation from '@/app/components/Navigation'
+import Navigation from '@/components/Navigation'
 import { MessageSquare, Search, Eye, EyeOff, CheckCircle, Clock, XCircle, User, Smartphone, Mail, Reply, Send, MoreVertical, MessageCircle } from 'lucide-react'
 import { getSupportMessages, saveSupportReply, toggleMessageReadStatus } from '@/app/actions'
 
