@@ -380,7 +380,7 @@ export default function RedemptionsPage() {
               <Gift size={28} />
             </div>
             <div>
-              <h1 className="text-4xl font-black gradient-text">Redemptions</h1>
+              <h1 className="text-2xl md:text-4xl font-black gradient-text">Redemptions</h1>
               <p className="text-gray-400 text-sm">Track all user redemption activity</p>
             </div>
           </div>

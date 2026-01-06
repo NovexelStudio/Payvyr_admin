@@ -55,7 +55,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4">
-      <div className="w-full max-w-[420px] bg-[#0f0f0f] border border-white/5 rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden">
+      <div className="w-full max-w-[420px] bg-[#0f0f0f] border border-white/5 rounded-[2.5rem] p-6 md:p-10 shadow-2xl relative overflow-hidden">
         
         {/* Decorative Glow */}
         <div className="absolute -top-24 -left-24 w-48 h-48 bg-[#D62323] blur-[100px] opacity-20"></div>
@@ -64,7 +64,7 @@ export default function LoginPage() {
           <div className="w-20 h-20 bg-[#D62323] rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_50px_rgba(214,35,35,0.4)]">
             <Lock className="text-white" size={36} />
           </div>
-          <h1 className="text-4xl font-black text-white tracking-tighter italic uppercase">
+          <h1 className="text-2xl md:text-4xl font-black text-white tracking-tighter italic uppercase">
             Payvyr<span className="text-[#D62323]">.Admin</span>
           </h1>
           <p className="text-gray-500 text-[10px] mt-2 uppercase tracking-[0.4em] font-black italic">Terminal Restricted</p>

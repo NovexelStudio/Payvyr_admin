@@ -120,8 +120,8 @@ export default function AnalyticsPage() {
                 </svg>
               </button>
               <div>
-                <h1 className="text-5xl font-black tracking-tight gradient-text">Analytics<span className="text-[#D62323]">&Insights</span></h1>
-                <p className="text-gray-400 text-lg mt-2">Comprehensive data analysis and system insights</p>
+                <h1 className="text-3xl md:text-5xl font-black tracking-tight gradient-text">Analytics<span className="text-[#D62323]">&Insights</span></h1>
+                <p className="text-gray-400 text-sm md:text-lg mt-2">Comprehensive data analysis and system insights</p>
                 <div className="w-24 h-1 bg-gradient-to-r from-[#D62323] to-[#ff4757] rounded-full mt-4"></div>
               </div>
             </div>

@@ -72,7 +72,7 @@ export default function DashboardPage() {
 
           {/* HEADER */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold tracking-tight gradient-text mb-3">
+            <h1 className="text-2xl md:text-4xl font-bold tracking-tight gradient-text mb-3">
               Dashboard
             </h1>
             <p className="text-gray-400 text-base">Welcome to your admin control center</p>

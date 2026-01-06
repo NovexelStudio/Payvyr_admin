@@ -176,8 +176,8 @@ export default function DeviceBindingsPage() {
               </svg>
             </button>
             <div>
-              <h1 className="text-5xl font-black tracking-tight gradient-text">Device<span className="text-[#D62323]">Bindings</span></h1>
-              <p className="text-gray-400 text-lg mt-2">Manage and monitor device registrations</p>
+              <h1 className="text-3xl md:text-5xl font-black tracking-tight gradient-text">Device<span className="text-[#D62323]">Bindings</span></h1>
+              <p className="text-gray-400 text-sm md:text-lg mt-2">Manage and monitor device registrations</p>
               <div className="w-24 h-1 bg-gradient-to-r from-[#D62323] to-[#ff4757] rounded-full mt-4"></div>
             </div>
           </div>

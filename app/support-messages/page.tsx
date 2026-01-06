@@ -205,8 +205,8 @@ export default function SupportMessagesPage() {
                 </svg>
               </button>
               <div>
-                <h1 className="text-5xl font-black tracking-tight gradient-text">Support<span className="text-[#D62323]">Messages</span></h1>
-                <p className="text-gray-400 text-lg mt-2">Manage and respond to user support requests</p>
+                <h1 className="text-3xl md:text-5xl font-black tracking-tight gradient-text">Support<span className="text-[#D62323]">Messages</span></h1>
+                <p className="text-gray-400 text-sm md:text-lg mt-2">Manage and respond to user support requests</p>
                 <div className="w-24 h-1 bg-gradient-to-r from-[#D62323] to-[#ff4757] rounded-full mt-4"></div>
               </div>
             </div>
